@@ -3,6 +3,19 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Teacher } from "../models/teachers.models.js";
 
+const genrateAccessTokenAndRefreshToken = async (userId) => {
+    try {
+        const ser = await Teacher.findById(userId);
+        const accessToken = ser.genrateAccessToken();
+        const refreshToken = ser.genrateRefreshToken();
+        ser.refreshToken = refreshToken;
+        ser.save({ validateBeforeSave: false }); 
+        return { accessToken, refreshToken };
+    } catch (error) {
+        throw new ApiError(420, "You are not authorised");
+    }
+};
+
 const registerTeacher = asyncHandler(async(req,res)=>{
     try {
         const {fullname , email , password , mobile ,gender} = req.body
@@ -40,7 +53,42 @@ const registerTeacher = asyncHandler(async(req,res)=>{
         throw new ApiError(400,`${error.message}`)
     }
 })
-
+const loginTeacher = asyncHandler(async(req,res)=>{
+    try {
+        const {email,password} = req.body
+        const teacher = await Teacher.findOne({ email})
+        if (!teacher) {
+            throw new ApiError(400,"Teacher doesn't exsist")
+        }
+        const isPasswordValid = await teacher.isPasswordCorrect(password)
+        if (!(isPasswordValid)){
+            throw new ApiError(405, "invalid credential")
+            }
+            const {accessToken, refreshToken} = await genrateAccessTokenAndRefreshToken(teacher._id)    
+            const loggedUser = await Teacher.findById(teacher._id).select("-password -refreshToken")
+            const options = {
+                httpOnly : true ,
+                secure : true
+            }
+            return res.status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", refreshToken, options)
+            .json(
+              new ApiResponse(
+                  200, 
+                  {
+                      loggedUser : loggedUser,
+                      accessToken : accessToken,
+                      refreshToken : refreshToken
+                  },
+                  "User logged In Successfully"
+              )
+          )
+        }catch (error) {
+        throw new ApiError(400,`${error.message}`)        
+    }
+})
 export {
-    registerTeacher
+    registerTeacher,
+    loginTeacher
 }
