@@ -14,8 +14,7 @@ const genrateAccessTokenAndRefreshToken = async (userId) => {
     } catch (error) {
         throw new ApiError(420, "You are not authorised");
     }
-};
-
+}
 const registerTeacher = asyncHandler(async(req,res)=>{
     try {
         const {fullname , email , password , mobile ,gender} = req.body
@@ -88,7 +87,31 @@ const loginTeacher = asyncHandler(async(req,res)=>{
         throw new ApiError(400,`${error.message}`)        
     }
 })
+const logOutTeacher = asyncHandler(async(req,res)=>{
+    await Teacher.findByIdAndUpdate(
+        req.theTeacher._id,
+        {
+            $unset:{
+                refreshToken : 1
+            }
+        }, 
+            {
+                new : true
+            }
+     )
+     const options = {
+        httpOnly: true,
+        secure: true
+    }
+    return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, {}, "Teacher logged Out"))
+ })
+ 
 export {
     registerTeacher,
-    loginTeacher
+    loginTeacher,
+    logOutTeacher
 }
