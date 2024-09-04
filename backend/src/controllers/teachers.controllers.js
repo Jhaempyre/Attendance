@@ -109,7 +109,18 @@ const logOutTeacher = asyncHandler(async(req,res)=>{
     .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, {}, "Teacher logged Out"))
  })
- 
+const addBranch = asyncHandler(async(req,res)=>{
+
+})
+const addSection = asyncHandler(async(req,res)=>{
+
+})
+const addSubejct = asyncHandler(async(req,res)=>{
+
+})
+const addStudent = asyncHandler(async(req,res)=>{
+    
+})
 export {
     registerTeacher,
     loginTeacher,
