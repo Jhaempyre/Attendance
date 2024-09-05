@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Teacher } from "../models/teachers.models.js";
 import { Student } from "../models/students.models.js";
+import { Branch } from "../models/branch.models.js";
 
 const genrateAccessTokenAndRefreshToken = async (userId) => {
     try {
