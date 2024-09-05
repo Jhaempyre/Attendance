@@ -29,6 +29,8 @@ app.use(express.static("public"))//public asset hae jaha
 
 import teachers from "./routes/teacher.routes.js"
 app.use("/api/v1/tech",teachers)
+import operations from "./routes/operations.routes.js"
+app.use("/api/v1/opt",operations)
 
 
 export {app}
