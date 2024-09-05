@@ -2,6 +2,7 @@ import {asyncHandler} from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Teacher } from "../models/teachers.models.js";
+import { Student } from "../models/students.models.js";
 
 const genrateAccessTokenAndRefreshToken = async (userId) => {
     try {
@@ -110,17 +111,128 @@ const logOutTeacher = asyncHandler(async(req,res)=>{
     .json(new ApiResponse(200, {}, "Teacher logged Out"))
  })
 const addBranch = asyncHandler(async(req,res)=>{
+    try {
+        const { name } = req.body;
 
+        if (!name) {
+            throw new ApiError(400, "Branch name is required");
+        }
+
+        const existingBranch = await Branch.findOne({ name });
+        if (existingBranch) {
+            throw new ApiError(400, "Branch already exists");
+        }
+
+        const newBranch = new Branch({ name });
+        const savedBranch = await newBranch.save();
+
+        res.status(200).json(new ApiResponse(200, "Branch added successfully", savedBranch));
+    } catch (error) {
+        throw new ApiError(500, error.message);
+    }
 })
 const addSection = asyncHandler(async(req,res)=>{
+    try {
+        const { name, branchId, yearId } = req.body;
 
+        if (!name || !branchId || !yearId) {
+            throw new ApiError(400, "Section name, branch, and year are required");
+        }
+
+        const sectionExists = await Section.findOne({ name, branch: branchId, year: yearId });
+        if (sectionExists) {
+            throw new ApiError(400, "Section already exists for this branch and year");
+        }
+
+        const newSection = new Section({
+            name,
+            branch: branchId,
+            year: yearId
+        });
+
+        const savedSection = await newSection.save();
+        res.status(200).json(new ApiResponse(200, "Section added successfully", savedSection));
+    } catch (error) {
+        throw new ApiError(500, error.message);
+    }
 })
 const addSubejct = asyncHandler(async(req,res)=>{
+    try {
+        const { name, code, branchId, yearId } = req.body;
 
+        if (!name || !code || !branchId || !yearId) {
+            throw new ApiError(400, "Subject name, code, branch, and year are required");
+        }
+
+        const existingSubject = await Subject.findOne({ code, branch: branchId, year: yearId });
+        if (existingSubject) {
+            throw new ApiError(400, "Subject with this code already exists");
+        }
+
+        const newSubject = new Subject({
+            name,
+            code,
+            branch: branchId,
+            year: yearId
+        });
+
+        const savedSubject = await newSubject.save();
+        res.status(200).json(new ApiResponse(200, "Subject added successfully", savedSubject));
+    } catch (error) {
+        throw new ApiError(500, error.message);
+    }
 })
 const addStudent = asyncHandler(async(req,res)=>{
-    
+    try {
+        const { enrollmentNumber, fullname, yearId, branchId, sectionId } = req.body;
+
+        if (!enrollmentNumber || !fullname || !yearId || !branchId || !sectionId) {
+            throw new ApiError(400, "All fields are required");
+        }
+
+        const existingStudent = await Student.findOne({ enrollmentNumber });
+        if (existingStudent) {
+            throw new ApiError(400, "Student with this enrollment number already exists");
+        }
+
+        const newStudent = new Student({
+            enrollmentNumber,
+            fullname,
+            year: yearId,
+            branch: branchId,
+            section: sectionId
+        });
+
+        const savedStudent = await newStudent.save();
+        res.status(200).json(new ApiResponse(200, "Student added successfully", savedStudent));
+    } catch (error) {
+        throw new ApiError(500, error.message);
+    }
 })
+const getStudentsBySection = asyncHandler(async (req, res) => {
+    try {
+        const { sectionId } = req.params;
+
+        if (!sectionId) {
+            throw new ApiError(400, "Section ID is required");
+        }
+
+        const students = await Student.find({ section: sectionId })
+            .populate('year', 'name')  // To include year information
+            .populate('branch', 'name')  // To include branch information
+            .populate('section', 'name'); // To include section information
+
+        if (students.length === 0) {
+            return res.status(404).json(new ApiResponse(404, {}, "No students found in this section"));
+        }
+
+        return res.status(200).json(new ApiResponse(200, students, "Students fetched successfully"));
+    } catch (error) {
+        throw new ApiError(500, error.message);
+    }
+});
+
+
 export {
     registerTeacher,
     loginTeacher,
