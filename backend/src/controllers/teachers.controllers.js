@@ -232,9 +232,13 @@ const getStudentsBySection = asyncHandler(async (req, res) => {
     }
 });
 
-
 export {
     registerTeacher,
     loginTeacher,
-    logOutTeacher
+    logOutTeacher,
+    addBranch,
+    addSection,
+    addSubejct,
+    addStudent,
+    getStudentsBySection
 }
