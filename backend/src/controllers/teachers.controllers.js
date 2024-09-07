@@ -4,6 +4,8 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Teacher } from "../models/teachers.models.js";
 import { Student } from "../models/students.models.js";
 import { Branch } from "../models/branch.models.js";
+import { transformSync } from "next/dist/build/swc/index.js";
+import { Year } from "../models/years.models.js";
 
 const genrateAccessTokenAndRefreshToken = async (userId) => {
     try {
@@ -111,6 +113,24 @@ const logOutTeacher = asyncHandler(async(req,res)=>{
     .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, {}, "Teacher logged Out"))
  })
+const addYear = asyncHandler(async(req,res)=>{
+    try {
+        const {year} = req.body
+        if (!year) {
+            throw new ApiError(400, "Year is required");
+        }
+        const existingYear= await Year.findOne({ year });
+        if (existingBranch) {
+            throw new ApiError(400, "Year already exists");
+        }
+        const newYear = new Year({ year });
+        const savedYear = await newYear.save();
+
+        res.status(200).json(new ApiResponse(200, "Branch added successfully", savedYear));
+    } catch (error) {
+        throw new ApiError(500, error.message);
+    }
+})
 const addBranch = asyncHandler(async(req,res)=>{
     try {
         const { name } = req.body;
@@ -131,7 +151,7 @@ const addBranch = asyncHandler(async(req,res)=>{
     } catch (error) {
         throw new ApiError(500, error.message);
     }
-})
+})//working
 const addSection = asyncHandler(async(req,res)=>{
     try {
         const { name, branchId, yearId } = req.body;
@@ -237,6 +257,7 @@ export {
     registerTeacher,
     loginTeacher,
     logOutTeacher,
+    addYear,
     addBranch,
     addSection,
     addSubejct,
