@@ -4,13 +4,12 @@ const subjectSchema = new Schema(
     {
         name: {
             type: String,
-            required: true,
-            trim: true,
+            required: true
+            
         },
         code: {
             type: String,
-            required: true,
-            unique: true, // e.g., "CSE201"
+            required: true
         },
         year: {
             type: Schema.Types.ObjectId,

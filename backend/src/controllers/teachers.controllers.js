@@ -6,6 +6,8 @@ import { Student } from "../models/students.models.js";
 import { Branch } from "../models/branch.models.js";
 import { transformSync } from "next/dist/build/swc/index.js";
 import { Year } from "../models/years.models.js";
+import { Section } from "../models/sections.models.js";
+import { Subject } from "../models/subjects.models.js";
 
 const genrateAccessTokenAndRefreshToken = async (userId) => {
     try {
@@ -116,17 +118,22 @@ const logOutTeacher = asyncHandler(async(req,res)=>{
 const addYear = asyncHandler(async(req,res)=>{
     try {
         const {year} = req.body
+        console.log(year)
         if (!year) {
             throw new ApiError(400, "Year is required");
         }
         const existingYear= await Year.findOne({ year });
-        if (existingBranch) {
+        console.log("2")
+        if (existingYear) {
             throw new ApiError(400, "Year already exists");
         }
+        console.log("1")
         const newYear = new Year({ year });
+        console.log(newYear)
         const savedYear = await newYear.save();
+        console.log(savedYear)
 
-        res.status(200).json(new ApiResponse(200, "Branch added successfully", savedYear));
+        res.status(200).json(new ApiResponse(200, "Year Added successfully", savedYear));
     } catch (error) {
         throw new ApiError(500, error.message);
     }
@@ -239,7 +246,7 @@ const getStudentsBySection = asyncHandler(async (req, res) => {
         }
 
         const students = await Student.find({ section: sectionId })
-            .populate('year', 'name')  // To include year information
+            .populate('year', 'year')  // To include year information
             .populate('branch', 'name')  // To include branch information
             .populate('section', 'name'); // To include section information
 
