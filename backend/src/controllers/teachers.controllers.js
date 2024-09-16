@@ -254,7 +254,7 @@ const getStudentsBySection = asyncHandler(async (req, res) => {
             return res.status(404).json(new ApiResponse(404, {}, "No students found in this section"));
         }
 
-        return res.status(200).json(new ApiResponse(200, students, "Students fetched successfully"));
+        return res.status(200).json(new ApiResponse(200, students, "Students fetched very successfully"));
     } catch (error) {
         throw new ApiError(500, error.message);
     }
